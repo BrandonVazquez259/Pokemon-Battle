@@ -25,35 +25,50 @@ public class BattleManager : MonoBehaviour
     public void RemoveFighter(Fighter fighter)
     {
         _fighters.Remove(fighter);
-        StopCoroutine (_battleCorroutine);
+        if (_battleCorroutine != null)
+        {
+            StopCoroutine (_battleCorroutine);
+        }
+        
+    }
+    private void InitializeFighters()
+    {
+        foreach (var fighter in _fighters)
+        {
+            fighter.InitializeFighter();
+        }
     }
     public void StartBattle()
 
     {
-        StartCoroutine(BattleCorroutine());  
+        InitializeFighters();
+        StartCoroutine(BattleCorroutine());
     } 
     private IEnumerator BattleCorroutine()
     {
         _onBattleStarted?.Invoke();
-        while (_fighters.Count != _fightersNeededToStart)
+        while (_fighters.Count > 1)
         {
             Fighter attacker = _fighters[Random.Range(0, _fighters.Count)];
             Fighter defender = _fighters[Random.Range(0, _fighters.Count)];
-            attacker.transform.LookAt(defender.transform);
-            defender.transform.LookAt(defender.transform);
+
             while (defender == attacker)
             {
                 defender = _fighters[Random.Range(0, _fighters.Count)];
             }
+            attacker.transform.LookAt(defender.transform);
+            defender.transform.LookAt(defender.transform);
             Attack attack = attacker.AttackData.attacks[Random.Range(0, attacker.AttackData.attacks.Length)];
             float damage = Random.Range(attack.minDamage, attack.maxDamage);
             attacker.CharacterAnimator.Play(attack.animationName);
+            SoundManager.instance.Play(attack.soundName);
             yield return new WaitForSeconds(attack.attackDuration);
             defender.Health.TakeDamage(damage);
             if (defender.Health.CurrentHealth <= 0)
             {
                 RemoveFighter(defender);
             }
+            yield return new WaitForSeconds(2f);
         }
         _onBattleEnded?.Invoke();
     }

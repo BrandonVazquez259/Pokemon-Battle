@@ -18,10 +18,10 @@ MonoBehaviour:
     maxDamage: 80
     attackDuration: 2
     animationName: Attack
-    soundName: 
+    soundName: CharizardAttack1
   - AttackName: Planetary attack
     minDamage: 50
     maxDamage: 100
     attackDuration: 3
     animationName: Attack2
-    soundName: 
+    soundName: CharizardAttack2

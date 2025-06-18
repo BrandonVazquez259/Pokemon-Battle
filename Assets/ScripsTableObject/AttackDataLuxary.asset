@@ -18,10 +18,10 @@ MonoBehaviour:
     maxDamage: 80
     attackDuration: 2
     animationName: Attack
-    soundName: 
+    soundName: LuxaryAttack1
   - AttackName: Aullido
     minDamage: 30
     maxDamage: 80
     attackDuration: 2
     animationName: Attack
-    soundName: 
+    soundName: LuxaryAttack2

@@ -892,11 +892,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: bd_ev115_down
+      name: die
       takeName: bd_ev115_down
       internalID: -5061973864183915006
       firstFrame: 0
-      lastFrame: 95
+      lastFrame: 45
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Rendering;
 
 public class Fighter : MonoBehaviour
 {
@@ -15,5 +17,11 @@ public class Fighter : MonoBehaviour
     [SerializeField]
     private Animator _characterAnimator;
     public Animator CharacterAnimator => _characterAnimator;
+    [SerializeField]
+    private UnityEvent _onInitialize;
 
+    public void InitializeFighter()
+    {
+        _onInitialize?.Invoke(); 
+    } 
 }
