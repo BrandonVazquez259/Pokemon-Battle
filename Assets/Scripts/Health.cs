@@ -18,15 +18,15 @@ public class Health : MonoBehaviour
 
     [SerializeField]
 
-    private UnityEvent<float>_onTakeDamage;
+    private UnityEvent<DamageTarget>_onTakeDamage;
     [SerializeField]
 
     private UnityEvent _onDie;
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(DamageTarget damageTarget)
     {
-        _currentHealth -= damage;
-        _onTakeDamage.Invoke(damage);
+        _currentHealth -= damageTarget.damage;
+        _onTakeDamage.Invoke(damageTarget);
         if (_currentHealth <= 0)
         {
             Die();
