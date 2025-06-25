@@ -13,6 +13,9 @@ public class BattleManager : MonoBehaviour
     private UnityEvent _onBattleStarted;
     [SerializeField]
     private UnityEvent _onBattleEnded;
+    [SerializeField]
+     
+    private UnityEvent _onBattleStopped;
     private Coroutine _battleCorroutine;
 
     private DamageTarget _damageTarget = new DamageTarget();
@@ -21,7 +24,7 @@ public class BattleManager : MonoBehaviour
         _fighters.Add(fighter);
         if (_fighters.Count >= _fightersNeededToStart)
         {
-            StartBattle();
+            _onBattleStarted?.Invoke();
         }
     }
     public void RemoveFighter(Fighter fighter)
@@ -31,7 +34,7 @@ public class BattleManager : MonoBehaviour
         {
             StopCoroutine (_battleCorroutine);
         }
-        
+        _onBattleStopped?.Invoke();
     }
     private void InitializeFighters()
     {
@@ -48,7 +51,7 @@ public class BattleManager : MonoBehaviour
     } 
     private IEnumerator BattleCorroutine()
     {
-        _onBattleStarted?.Invoke();
+        
         while (_fighters.Count > 1)
         {
             Fighter attacker = _fighters[Random.Range(0, _fighters.Count)];
