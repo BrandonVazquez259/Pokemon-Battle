@@ -43,6 +43,7 @@ public class Timer : MonoBehaviour
             yield return new WaitForSeconds(1f);
 
         }
+        _onTimerFinished?.Invoke();
 
     }
     public void StopTimer()

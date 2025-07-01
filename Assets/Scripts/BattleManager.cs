@@ -14,13 +14,14 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private UnityEvent _onBattleEnded;
     [SerializeField]
-     
+
     private UnityEvent _onBattleStopped;
     private Coroutine _battleCorroutine;
 
     private DamageTarget _damageTarget = new DamageTarget();
-        public void AddFighter(Fighter fighter)
+    public void AddFighter(Fighter fighter)
     {
+        FrameText.Instance.ShowText(fighter.FighterName + "has joined the battle");
         _fighters.Add(fighter);
         if (_fighters.Count >= _fightersNeededToStart)
         {
@@ -30,9 +31,9 @@ public class BattleManager : MonoBehaviour
     public void RemoveFighter(Fighter fighter)
     {
         _fighters.Remove(fighter);
-        if (_battleCorroutine != null)
+        if (_battleCorroutine != null && _fighters.Count == 1)
         {
-            StopCoroutine (_battleCorroutine);
+            StopCoroutine(_battleCorroutine);
         }
         _onBattleStopped?.Invoke();
     }
@@ -47,11 +48,12 @@ public class BattleManager : MonoBehaviour
 
     {
         InitializeFighters();
-        StartCoroutine(BattleCorroutine());
-    } 
+        _battleCorroutine = StartCoroutine(BattleCorroutine());
+    }
+
     private IEnumerator BattleCorroutine()
     {
-        
+
         while (_fighters.Count > 1)
         {
             Fighter attacker = _fighters[Random.Range(0, _fighters.Count)];
@@ -68,6 +70,8 @@ public class BattleManager : MonoBehaviour
             attacker.CharacterAnimator.Play(attack.animationName);
             SoundManager.instance.Play(attack.soundName);
             GameObject attackParticles = Instantiate(attack.particlesPrefab, attacker.transform.position, Quaternion.identity);
+            attackParticles.transform.SetParent(attacker.transform);
+            FrameText.Instance.ShowText(attacker.FighterName + "attacks with" + attack.AttackName);
             yield return new WaitForSeconds(attack.attackDuration);
             GameObject hitParticles = Instantiate(attack.particlesPrefab, defender.transform.position, Quaternion.identity);
             hitParticles.transform.SetParent(defender.transform);
@@ -75,10 +79,20 @@ public class BattleManager : MonoBehaviour
             defender.Health.TakeDamage(_damageTarget);
             if (defender.Health.CurrentHealth <= 0)
             {
-                RemoveFighter(defender);
+                _fighters.Remove(defender);
             }
             yield return new WaitForSeconds(2f);
         }
+        WinBattle(_fighters[0]);
+
+    }
+    private void WinBattle(Fighter winner)
+    {
+        FrameText.Instance.ShowText(winner.FighterName + "wins the battle");
+        winner.CharacterAnimator.Play(winner.WinAnimationName);
+        SoundManager.instance.Play(winner.WinSoundName);
+        winner.transform.LookAt(Camera.main.transform);
         _onBattleEnded?.Invoke();
+        _battleCorroutine = null;
     }
 }

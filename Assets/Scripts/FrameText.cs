@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
-public class FreindText : MonoBehaviour
+public class FrameText : MonoBehaviour
 {
     [SerializeField]
     private Text _text;
@@ -19,8 +19,21 @@ public class FreindText : MonoBehaviour
 
     private string _fullText;
     private Coroutine _showTextCouroutine;
+    public static FrameText Instance {get; private set;}
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
 
-    private void StopText()
+    private void StopText(bool stopAnimation = false)
     {
         if (_showTextCouroutine != null)
         {
@@ -28,11 +41,15 @@ public class FreindText : MonoBehaviour
             _showTextCouroutine = null;
         }
         _text.text = "";
+        if (stopAnimation)
+        {
+            _animator.Play(_hideTextAnimationName, 0, 0f);
+        }
     }
     public void ShowText(string text)
     {
         StopText();
-        _animator.Play(_showTextAnimationName);
+        _animator.Play(_showTextAnimationName, 0, 0f);
         _showTextCouroutine = StartCoroutine(ShowTextCouroutine(text));
 
     }
@@ -48,6 +65,6 @@ public class FreindText : MonoBehaviour
         }
         yield return new WaitForSeconds(_timeToDisappear);
         _showTextCouroutine = null;
-        _animator.Play(_hideTextAnimationName);
+        _animator.Play(_hideTextAnimationName, 0, 0f);
     }
 }
