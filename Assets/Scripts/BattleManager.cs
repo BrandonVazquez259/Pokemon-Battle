@@ -12,28 +12,44 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private UnityEvent _onBattleStarted;
     [SerializeField]
+    private UnityEvent _onFindPokemon;
+    [SerializeField]
+    private UnityEvent _onNonPokemon;
+    [SerializeField]
     private UnityEvent _onBattleEnded;
     [SerializeField]
-
     private UnityEvent _onBattleStopped;
-    private Coroutine _battleCorroutine;
-
+    private Coroutine _battleCoroutine;
     private DamageTarget _damageTarget = new DamageTarget();
     public void AddFighter(Fighter fighter)
     {
-        FrameText.Instance.ShowText(fighter.FighterName + "has joined the battle");
+        _onFindPokemon?.Invoke();
+        FrameText.Instance.ShowText(fighter.FighterName + " has joined the battle!");
         _fighters.Add(fighter);
         if (_fighters.Count >= _fightersNeededToStart)
         {
+            StopBattle();
+            InitializeFighters();
             _onBattleStarted?.Invoke();
         }
     }
     public void RemoveFighter(Fighter fighter)
     {
         _fighters.Remove(fighter);
-        if (_battleCorroutine != null && _fighters.Count == 1)
+        if (_fighters.Count == 1)
         {
-            StopCoroutine(_battleCorroutine);
+            StopBattle();
+        }
+        if (_fighters.Count == 0)
+        {
+           _onNonPokemon?.Invoke();
+        }
+    }
+    public void StopBattle()
+    {
+        if (_battleCoroutine != null)
+        {
+            StopCoroutine(_battleCoroutine);
         }
         _onBattleStopped?.Invoke();
     }
@@ -45,35 +61,30 @@ public class BattleManager : MonoBehaviour
         }
     }
     public void StartBattle()
-
     {
-        InitializeFighters();
-        _battleCorroutine = StartCoroutine(BattleCorroutine());
+        _battleCoroutine = StartCoroutine(BattleCoroutine());
     }
-
-    private IEnumerator BattleCorroutine()
+    private IEnumerator BattleCoroutine()
     {
-
         while (_fighters.Count > 1)
         {
             Fighter attacker = _fighters[Random.Range(0, _fighters.Count)];
             Fighter defender = _fighters[Random.Range(0, _fighters.Count)];
-
             while (defender == attacker)
             {
                 defender = _fighters[Random.Range(0, _fighters.Count)];
             }
             attacker.transform.LookAt(defender.transform);
-            defender.transform.LookAt(defender.transform);
+            defender.transform.LookAt(attacker.transform);
             Attack attack = attacker.AttackData.attacks[Random.Range(0, attacker.AttackData.attacks.Length)];
             float damage = Random.Range(attack.minDamage, attack.maxDamage);
             attacker.CharacterAnimator.Play(attack.animationName);
             SoundManager.instance.Play(attack.soundName);
             GameObject attackParticles = Instantiate(attack.particlesPrefab, attacker.transform.position, Quaternion.identity);
             attackParticles.transform.SetParent(attacker.transform);
-            FrameText.Instance.ShowText(attacker.FighterName + "attacks with" + attack.AttackName);
+            FrameText.Instance.ShowText(attacker.FighterName + " attacks with " + attack.attackName);
             yield return new WaitForSeconds(attack.attackDuration);
-            GameObject hitParticles = Instantiate(attack.particlesPrefab, defender.transform.position, Quaternion.identity);
+            GameObject hitParticles = Instantiate(attack.hitParticlesPrefab, defender.transform.position, Quaternion.identity);
             hitParticles.transform.SetParent(defender.transform);
             _damageTarget.SetDamageTarget(defender.transform, damage);
             defender.Health.TakeDamage(_damageTarget);
@@ -84,15 +95,15 @@ public class BattleManager : MonoBehaviour
             yield return new WaitForSeconds(2f);
         }
         WinBattle(_fighters[0]);
-
     }
+
     private void WinBattle(Fighter winner)
     {
-        FrameText.Instance.ShowText(winner.FighterName + "wins the battle");
+        FrameText.Instance.ShowText(winner.FighterName + " wins the battle!");
         winner.CharacterAnimator.Play(winner.WinAnimationName);
         SoundManager.instance.Play(winner.WinSoundName);
         winner.transform.LookAt(Camera.main.transform);
         _onBattleEnded?.Invoke();
-        _battleCorroutine = null;
+        _battleCoroutine = null;
     }
 }

@@ -8,7 +8,7 @@ public class AttackData : ScriptableObject
 [System.Serializable]
 public class Attack
 {
-    public string AttackName;
+    public string attackName;
     public float minDamage;
 
     public float maxDamage;
